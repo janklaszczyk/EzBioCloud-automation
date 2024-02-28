@@ -121,18 +121,18 @@ def main(current_sample_ID):
     except Exception as e:
         print("Error:", e)
 
-#creating sample file and UWAGI.txt file with valid reads info
-def create_file_uwagi(seq_file_path, current_sample_ID, total_valid_reads, percentage_valid_reads):
+#creating sample file and INFO.txt file with valid reads info
+def create_info_file(seq_file_path, current_sample_ID, total_valid_reads, percentage_valid_reads):
 
     os.mkdir(seq_file_path + '\\' + current_sample_ID)
     # change directory
     os.chdir(seq_file_path + '\\' + current_sample_ID)
-    #opening/creating .txt file
-    UWAGI = open('UWAGI.txt', 'w')
-    #writing info to file UWAGI.txt
-    UWAGI.write('Total valid reads: ' + total_valid_reads + ' ' + percentage_valid_reads)
-    UWAGI.close()
-    print('File UWAGI for ' + current_sample_ID + ' have been created')
+    #opening/creating INFO.txt file
+    info_file = open('INFO.txt', 'w')
+    #writing info to file INFO.txt
+    info_file.write('Total valid reads: ' + total_valid_reads + ' ' + percentage_valid_reads)
+    info_file.close()
+    print('File INFO file for ' + current_sample_ID + ' have been created')
 
 #move all 4 downloaded fiels destination folder of current_sample_ID
 def move_files (source_folder, seq_file_path, current_sample_ID):
@@ -496,7 +496,7 @@ for current_sample_ID in seq_sample_list:
     driver = webdriver.Chrome()
 
     main(current_sample_ID)
-    create_file_uwagi(seq_file_path, current_sample_ID, total_valid_reads, percentage_valid_reads)
+    create_info_file(seq_file_path, current_sample_ID, total_valid_reads, percentage_valid_reads)
     download_files(seq_file_path)
     expand_taxonomy()
     create_genus_details_file(current_sample_ID)
