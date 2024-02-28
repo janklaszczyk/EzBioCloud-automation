@@ -1,5 +1,5 @@
 # EzBioCloud 
-Python script designed to streamline bioinformatics analysis and facilitate data extraction from EzBioCloud
+Python script designed to streamline bioinformatics analysis and facilitate data extraction from EzBioCloud [www.ezbiocloud.net/](url)
 
 EzBioCloud is a bioscience's public data and analytics portal focusing on taxonomy, ecology, genomics, metagenomics, and microbiome of Bacteria and Archaea. 
 
@@ -15,29 +15,39 @@ Firstly interpreter ask user for:
   
 # 2. Downloading and file management
 
-Programe downloads files and move them into given folder.
-Because of the fact that changing download folder location using Selenium Webdriver is problematic- the files are first downloaded into Users' Download folder by default and then renamed and moved into a given folder.
+Webdriver enter EZBioCloud, login and search first given sample ID.
+.xlsx files and .png charts for genus and species are downloaded and moved into given folder.
+
+Because of the fact that changing download folder location using `Selenium` Webdriver is problematic - the files are first downloaded into Users Download folder by default and then renamed and moved into a given folder.
 You can change a path of a download folder here:
 
-source_folder = r'C:\Users\Asus\Downloads\\'
+`source_folder` = r'C:\Users\Asus\Downloads\'
 
-Remember that folder for downloading MUST be empty.
+Remember that download folder **MUST** be empty.
 
 Sample file after this step:
+
 ![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/5b477672-29e0-4908-8f41-c1fa2fbacd91)
 
-# 3. Create INFO file
+# 3. Create INFO.txt file
 
-Webdriver enter EZBioCloud, enter and choose first given sample ID.
-Total valid reads and percentage valid reads values are taken and INFO file is created.
+_Total valid reads_ and _percentage valid reads_ values are taken and `INFO.txt` file is created.
 
 ![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/e1f9ce38-3759-4712-8174-e0a74eb4ce6d)
 
-# 4. 
+# 4. Create details.xlsx
 
-# The main goal is to create a single excel file based on files downloaded and EZBiocloud app for every sample. The excel sheet provide all microbiome genuses types sorted by percetage and separated column for species detected in a sample.
+The main goal is to create a single `details.xlsx` file based on files downloaded and EZBiocloud app for every sample. The excel sheet provide all microbiome genuses types sorted by percetage and create separated `Details` column for species detected in a sample for each genus.
 
+The threshold is set on 1% and only genus types and species with percentage more than 1% are processed and then shown in final excel sheet.
 
+Example genus file input:
 
-The treashhold is set on 1% and 
+![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/93bba852-c490-4fe4-87d9-6377c94c2380)
+..
 
+Example genus file output (final excel):
+
+![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/4252369e-9154-4c8f-ab01-c13ef9c3180f)
+
+# 5. 
