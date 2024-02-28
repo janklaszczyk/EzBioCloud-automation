@@ -1,0 +1,511 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.select import Select
+
+import tkinter as tk
+from tkinter import filedialog
+
+import re
+import pandas as pd
+import time
+import os
+import shutil
+
+
+class FileHandler:
+    def __init__(self, source_folder, destination_folder, current_sample_ID):
+        self.src = source_folder
+        self.dsc = destination_folder
+        self.curr = current_sample_ID
+
+    def rename_and_move(self, suffix):
+        # Get the list of files in the source folder
+        files = os.listdir(self.src)
+
+        # Get the path of the file in the source folder
+        file_name = files[0]
+        source_path = os.path.join(self.src, file_name)
+
+        # Construct the new file name based on the current sample ID and suffix
+        new_file_name = self.curr + '_' + suffix
+        destination_path = os.path.join(self.dsc, new_file_name)
+
+        # Rename and move the file
+        try:
+            shutil.move(source_path, destination_path)
+            print(f"File successfully renamed and moved to {destination_path}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+def main(current_sample_ID):
+    '''Main function for searching current sample ID in Ezbiocloud. Extract total valid reads and percentage_valid_reads.'''
+    try:
+
+
+      # Open the EzbioCloud
+        driver.get('https://www.ezbiocloud.net/')
+        # Enter full-screen mode
+        driver.maximize_window()
+        # Find and click the "Log in" button
+        login_button = WebDriverWait(driver, 10).until(
+            ec.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/header/div/div/div/div/div/div/div/ul[2]/li[5]/div'))
+        )
+        login_button.click()
+        # Find and fill in the login and password fields
+        username_field = WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div[2]/div[1]/div[4]/div[1]/div[2]/div[2]/div[1]/input'))
+        )
+        username_field.send_keys(login)
+        password_field = WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located(
+                (By.XPATH, "/html/body/div[2]/div[2]/div[1]/div[4]/div[1]/div[2]/div[3]/div[1]/input"))
+        )
+        password_field.send_keys(password)
+        # Submit the form
+        password_field.send_keys(Keys.RETURN)
+        # Going to search page step 1 - Next_16S_basedMTP
+        next_16S_basedMTP = WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.XPATH,
+                                            '/html/body/div[2]/div[2]/div/div[1]/div/div/div[1]/div/div/div/div[2]/div/div/div/div[1]/div/div[1]/div[1]/div[2]/a/span[2]'))
+        )
+        next_16S_basedMTP.click()
+        # Go to search page stage 2 - ViewMTPs
+        next_viewMTPs = WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div[2]/section[1]/div/div/div/div/div[3]/a[1]'))
+        )
+        next_viewMTPs.click()
+
+        # Search an sample ID - click searching window 2 times
+        search_sampleID_input1 = WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[2]/div/div[2]/div/div[3]/div[2]/div/div[2]/div[1]/div[2]/div/button/i[1]'))
+        )
+        search_sampleID_input1.click()
+        search_sampleID_input2 = WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[2]/div/div[2]/div/div[3]/div[2]/div/div[2]/div[1]/div[2]/div/div/div/input'))
+        )
+        #Fill searching window. Sample name input as sampleID
+        search_sampleID_input2.send_keys(current_sample_ID)
+        driver.implicitly_wait(2)
+        search_sampleID_input2.send_keys(Keys.RETURN)
+        # save original window ID
+
+        original_window = driver.current_window_handle
+        #open sample results in new tab
+        open_sample_results = WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[2]/div/div[2]/div/div[3]/div[2]/div/div[2]/div[2]/div[1]/div[4]/div[2]/table/tbody/tr/td[2]/button'))
+        )
+        time.sleep(5)
+        open_sample_results.click()
+        time.sleep(10)
+        # get new tab window ID and switch to it
+        windows = driver.window_handles #list of windows ID
+        global total_valid_reads
+        global percentage_valid_reads
+        for w in windows:
+            if (w != original_window):
+                driver.switch_to.window(w)
+
+        #take total valid reads
+
+        total_valid_reads = driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div/div[1]/span[1]').text
+
+        #take percentage of valid reads
+        percentage_valid_reads = driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div/div[1]/span[2]').text
+
+    except Exception as e:
+        print("Error:", e)
+
+#creating sample file and UWAGI.txt file with valid reads info
+def create_file_uwagi(seq_file_path, current_sample_ID, total_valid_reads, percentage_valid_reads):
+
+    os.mkdir(seq_file_path + '\\' + current_sample_ID)
+    # change directory
+    os.chdir(seq_file_path + '\\' + current_sample_ID)
+    #opening/creating .txt file
+    UWAGI = open('UWAGI.txt', 'w')
+    #writing info to file UWAGI.txt
+    UWAGI.write('Total valid reads: ' + total_valid_reads + ' ' + percentage_valid_reads)
+    UWAGI.close()
+    print('File UWAGI for ' + current_sample_ID + ' have been created')
+
+#move all 4 downloaded fiels destination folder of current_sample_ID
+def move_files (source_folder, seq_file_path, current_sample_ID):
+    '''source_folder depends on default downloading folder in your Chrome browser'''
+
+    destination_folder = seq_file_path + '\\' + current_sample_ID
+
+    # fetch all files
+    for file_name in os.listdir(source_folder):
+        # construct full file path
+        source = source_folder + file_name
+        destination = destination_folder + file_name
+        # move only files
+        if os.path.isfile(source):
+            shutil.move(source, destination)
+            print('File moved:', file_name)
+
+def download_files(seq_file_path):
+    '''download all 4 files for sample. Downloaded to default file'''
+
+    destination_folder = seq_file_path + '\\' + current_sample_ID
+
+    handle_file = FileHandler(source_folder, destination_folder, current_sample_ID)
+    try:
+        # download taxonomic composition
+        taxonomic_composition = WebDriverWait(driver, 10).until(
+            ec.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[2]/div/div/div/ul/li[4]/a'))
+        )
+        taxonomic_composition.click()
+        time.sleep(5)
+        for file_name in os.listdir(source_folder):
+            new_name = current_sample_ID + 'genus.xlsx'
+            os.rename(file_name, new_name)
+        # scroll to Species
+        ActionChains(driver).move_to_element(driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[4]/div[2]/div[7]/div/div[2]/div/div/div[1]/div/div[1]/div/div[1]/div/div/div/div[2]/ul/li/a/span')).perform()
+        # dowload PNG file for species
+        PNG_file_species = WebDriverWait(driver, 10).until(
+            ec.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[4]/div[2]/div[7]/div/div[2]/div/div/div[1]/div/div[1]/div/div[1]/div/div/div/div[2]/ul/li/a/span'))
+        )
+        PNG_file_species.click()
+        time.sleep(5)
+        # rename and move PNG file for species to destination folder
+        handle_file.rename_and_move('species.png')
+
+        # download XLSX file for species
+        XLSX_file_species = WebDriverWait(driver, 10).until(
+            ec.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div[3]/div/div/div/div/div[4]/div[2]/div[7]/div/div[2]/div/div/div[2]/div/div/div[1]/button/span'))
+        )
+        XLSX_file_species.click()
+        time.sleep(5)
+
+        # rename and move XLSX file for species to destination folder
+        handle_file.rename_and_move('species.xlsx')
+
+        # scroll to Genus
+        ActionChains(driver).move_to_element(driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[4]/div[2]/div[6]/div/div[2]/div/div/div[1]/div/div[1]/div/div[1]/div/div/div/div[2]/ul/li/a/span')).perform()
+        #download PNG file for genus
+        PNG_file_genus = WebDriverWait(driver, 10).until(
+            ec.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[4]/div[2]/div[6]/div/div[2]/div/div/div[1]/div/div[1]/div/div[1]/div/div/div/div[2]/ul/li/a/span'))
+        )
+        PNG_file_genus.click()
+        time.sleep(5)
+
+        # rename and move PNG file for genus to destination folder
+        handle_file.rename_and_move('genus.png')
+
+        #download XLSX file for genus
+        XLSX_file_species = WebDriverWait(driver, 10).until(
+            ec.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[4]/div[2]/div[6]/div/div[2]/div/div/div[2]/div/div/div[1]/button/span'))
+        )
+        XLSX_file_species.click()
+        time.sleep(5)
+
+        # rename and move XLSX file for genus to destination folder
+        handle_file.rename_and_move('genus.xlsx')
+
+        return destination_folder
+    except Exception as e:
+        print("Error:", e)
+
+def expand_taxonomy():
+    #switch to taxonomic hierarchy
+    ActionChains(driver).move_to_element(driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div/div/div/ul/li[3]/a')).perform()
+    # download PNG file for species
+    taxonomic_hierarchy = WebDriverWait(driver, 10).until(
+        ec.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div[2]/div/div/div/ul/li[3]/a'))
+    )
+    taxonomic_hierarchy.click()
+    time.sleep(5)
+
+    #select item from dropdown menu custom_select
+    element_dropdown = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[1]/div[1]/div/div[1]/select')
+    select = Select(element_dropdown)
+    select.select_by_visible_text('Species')
+
+    # Click expand button
+    expand_button = WebDriverWait(driver, 10).until(
+    ec.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[1]/div[1]/div/div[2]/button')))
+    expand_button.click()
+    time.sleep(5)
+
+def create_genus_details_file(current_sample_ID):
+
+    genus_file = current_sample_ID +'_' + 'genus.xlsx'
+    # create df with only genus >=1% proportion
+    genus_df = pd.read_excel(genus_file, header=1)
+    modified_genus_df = genus_df.loc[genus_df['Proportion(%)'] >= int('1')]
+
+    species_file = current_sample_ID + '_' + 'species.xlsx'
+    # create df with only species >=1% proportion
+    species_df = pd.read_excel(species_file, header=1)
+    modified_species_df = species_df.loc[species_df['Proportion(%)'] >= int('1')]
+
+    # iterate after every genus name
+    for index, raw in modified_genus_df.iterrows():
+        genus =raw.loc['Taxon name']
+
+        # iterate every species with >=1% proportion
+        details_column_text_for_1_species = filtr_species(genus, modified_species_df)
+
+        # start creating text for details column
+        details_column_text_for_1_genus = 'Includes: ' + details_column_text_for_1_species
+        # adding text to column species_details
+        #details_column_text_for_1_genus = details_column_text_for_1_genus[:-2]
+        modified_genus_df.loc[index, 'Details'] = details_column_text_for_1_genus
+
+    print(modified_genus_df)
+    details_genus_file = current_sample_ID + '_genus_details.xlsx'
+    modified_genus_df.to_excel(details_genus_file)
+
+    return modified_genus_df
+
+
+def extract_species_details(species, species_proportion):
+    '''Prepare species name and proportion percentage for later use. Return: formatted_string_species and formatted_percentage'''
+
+    # Round the number to two decimal places
+    rounded_species_proportion = round(species_proportion, 2)
+
+    # Format the rounded number as a string with two decimal places and append a percentage sign
+    formatted_percentage = f"{rounded_species_proportion:.2f}%"
+
+    # split species name on genus and species part
+    species = species.split()
+
+    # Define the regular expression pattern to match two consecutive capital letters
+    clone_pattern = r'[A-Z]{2}'
+
+    # Use re.search to find the first occurrence of the pattern in the input string
+    match = re.search(clone_pattern, species[1])
+
+    # Check if hit_species_name is a clone name. Format string specifically.
+    if match:
+        # take only clone name and format it - delete "_s" phrase
+        formatted_string_species = species[1][:-2]
+        formatted_string_species = formatted_string_species + ' - ' + formatted_percentage
+    else:
+        # Extract the first letter of each word and join them with a dot
+        abbreviation = '.'.join(word[0] for word in species[:-1])
+
+        # Append the last word preceded by a dash
+        formatted_string_species = f"{abbreviation}. {species[-1]} - " + formatted_percentage
+
+    return formatted_string_species, formatted_percentage
+
+def filtr_species(genus, modified_species_df):
+
+    # Define the regular expression pattern to match the genus
+
+    global extract_species_details
+    genus_pattern = r'^' + genus + r'(\s|$)'
+    # Define the regular expression pattern to match the ending - 'group'
+    group_pattern = r'\b' + re.escape('group') + r'\b$'
+
+    details_column_text_for_1_species = ''
+
+    for index, raw in modified_species_df.iterrows():
+        species = raw.loc['Taxon name']
+        species_proportion = raw.loc['Proportion(%)']
+        # find the genus in the species string
+        match_species = re.search(genus_pattern, species)
+
+        # find the 'group' in the species string
+        match_group_of_species = re.search(group_pattern, species)
+
+        # If genus match a group of species eg. Streptococcus to Streptococcus anginous group
+        if match_species and match_group_of_species:
+
+            # edit xpath with species name
+            xpath = "//*[contains(text(), '{}')]"
+            xpath = xpath.format(species)
+            # scroll to species group and click
+            element = driver.find_element(By.XPATH, xpath)
+            ActionChains(driver).move_to_element(element).perform()
+            time.sleep(5)
+            element.click()
+            time.sleep(5)
+
+            # click on first contig
+            load = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.XPATH,
+            '/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[2]/div/div[2]/div/div[1]/div[1]/div/div[2]/div[1]/button')))
+            load.click()
+            time.sleep(5)
+            top_hit_contig = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.XPATH,
+            '/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[2]/div/div[2]/div/div[1]/div[1]/div/div[2]/div[3]/ul/li[2]/div[2]/div[1]/div')))
+
+            top_hit_contig.click()
+            time.sleep(5)
+            formatted_string_contig = compare_top_hits(species)
+
+            extract_species = extract_species_details(species, species_proportion)
+
+            details_column_text_for_1_species = details_column_text_for_1_species + formatted_string_contig + ' - ' + str(extract_species[1]) + ', '
+
+            # close top_hits
+            close_cross_contig = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.XPATH,
+            '/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[3]/div/div/div[1]/button/span')))
+            close_cross_contig.click()
+
+            # close little window of group info
+            close_cross_group = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.XPATH,
+            '/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[2]/div/div[1]/div[1]/div/div/div/div/div/div[2]/div[1]/button')))
+            close_cross_group.click()
+
+        # If genus match a species eg. Streptococcus to Streptococcus anginous
+        elif match_species:
+
+            extract_species = extract_species_details(species, species_proportion)
+
+            # update detail text and add to details_column_text_for_1_genus
+            details_column_text_for_1_species = details_column_text_for_1_species + str(extract_species[0]) + ', '
+        else:
+            continue
+
+    # delete last coma
+    details_column_text_for_1_species = details_column_text_for_1_species[:-2]
+
+    return details_column_text_for_1_species
+
+
+#take all 5 top hit similarity percentage data
+def compare_top_hits(species):
+    '''comparing top 5 hits in contig. Adding species name if similarity is 100% or > 99%'''
+
+    try:
+        # create text for species in one contig
+        details_column_text_for_1_contig = ''
+
+        # count nr of 100% top hits in contig
+        nr_of_100_hits_added = 0
+
+        top_5_hits = [1, 2, 3, 4, 5]
+        # iterate all of five top hits in contig
+        for hit in top_5_hits:
+            # take percentage of similarity
+            similarity_xpath = '/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[3]/div/div/div[2]/div[' \
+                               '2]/div/div/ul/li[{}]/div/div[3]/ul/li[1]/div/div[2] '
+            similarity_xpath = similarity_xpath.format(hit)
+            hit_similarity_nr = driver.find_element(By.XPATH, similarity_xpath).text
+            # delete "%" element
+            hit_similarity_nr = hit_similarity_nr[:-1]
+            # take species
+            species_name_xpath = '/html/body/div[1]/div[3]/div/div/div/div/div[3]/div[3]/div/div/div[2]/div[' \
+                                 '2]/div/div/ul/li[{}]/div/div[2]/div/span[2] '
+            species_name_xpath = species_name_xpath.format(hit)
+            hit_species_name = driver.find_element(By.XPATH, species_name_xpath).text
+
+            # cut every top hit under 100% or 99%. If there is no top hit >=99% then take the
+            if float(hit_similarity_nr) == 100:
+                nr_of_100_hits_added += 1
+
+                formatted_string_contig = add_hit_species_name(hit_species_name)
+
+                details_column_text_for_1_contig += formatted_string_contig + '/ '
+
+            elif 99 <= float(hit_similarity_nr) < 100 and nr_of_100_hits_added == 0:
+
+                formatted_string_contig = add_hit_species_name(hit_species_name)
+
+                details_column_text_for_1_contig += formatted_string_contig + '/ '
+
+            elif float(hit_similarity_nr) >= 99 and nr_of_100_hits_added >= 1:
+                break
+            elif float(hit_similarity_nr) < 99 and nr_of_100_hits_added == 0:
+
+                formatted_string_contig = add_hit_species_name(hit_species_name)
+
+                details_column_text_for_1_contig += formatted_string_contig + '/ '
+                break
+            else:
+                break
+        # delete last slash
+        details_column_text_for_1_contig = details_column_text_for_1_contig[:-2]
+
+        return details_column_text_for_1_contig
+
+    except Exception as e:
+        print(e)
+
+def add_hit_species_name(hit_species_name):
+    '''Corynebacterium minutissimum -> C. minutissimum/'''
+
+    # Define the regular expression pattern to match two consecutive capital letters
+    clone_pattern = r'[A-Z]{2}'
+
+    # Use re.search to find the first occurrence of the pattern in the input string
+    match = re.search(clone_pattern, hit_species_name)
+
+    # Check if hit_species_name is a clone name. Format string specifically.
+    if match:
+        # take only clone name and format it - delete "_s" phrase
+        formatted_string_contig = hit_species_name[:-2]
+    else:
+        hit_species_name = hit_species_name.split()
+
+        # Extract the first letter of each word and join them with a dot
+        abbreviation = '.'.join(word[0] for word in hit_species_name[:-1])
+
+        # Append the last word preceded by a slash
+        formatted_string_contig = f'{abbreviation}. {hit_species_name[-1]}'
+
+    return formatted_string_contig
+
+
+##### Data input and creating sequencing files #####
+
+# Create a Tkinter root window
+root = tk.Tk()
+root.withdraw()  # Hide the root window
+
+# Display the file dialog for saving files
+seq_file_path = filedialog.asksaveasfilename()
+
+# If a file path is selected, print it
+if seq_file_path:
+    print("Selected file path:", seq_file_path)
+else:
+    print("No file path selected.")
+
+seq_samples = input('Write all sequenced sample names separated by te comma (eg. Sample1, Sample2).\nEnsure that all '
+                    'samples have already been uploaded to EZBioCloud in your account: ')
+login = input('Type your Ezbiocloud login: ')
+print('You are logging to ' + login)
+password = input('Type your Ezbiocloud password: ')
+
+source_folder = r'C:\Users\Asus\Downloads\\'
+'''source_folder depends on default downloading folder in your Chrome browser. For default it is Downloads. 
+                                    THE SOURCE FOLDER MUST BE EMPTY'''
+
+print('Program started. Please step away from the computer and make Yourself a cup of coffee :)')
+
+# creating a list of samples from input
+seq_sample_list = seq_samples.split(', ')
+os.mkdir(seq_file_path)
+
+# main loop in order to iterate every sample in sequencing run called by user
+for current_sample_ID in seq_sample_list:
+
+    # Set up the Chrome WebDriver
+    chrome_options = webdriver.ChromeOptions()
+    driver = webdriver.Chrome()
+
+    main(current_sample_ID)
+    create_file_uwagi(seq_file_path, current_sample_ID, total_valid_reads, percentage_valid_reads)
+    download_files(seq_file_path)
+    expand_taxonomy()
+    create_genus_details_file(current_sample_ID)
+    # Close the browser window
+    driver.close()
+    print(current_sample_ID + ' analysis run successfully')
+
+print('ANALYSIS COMPLETED. ALL SAMPLES PROCESSED')
+
+driver.quit()
+
+# examples to test MN484_23, ME448_23, ME454_23
