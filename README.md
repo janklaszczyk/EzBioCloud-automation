@@ -1,5 +1,5 @@
 # EzBioCloud 
-### Python script designed to streamline bioinformatics analysis and facilitate data extraction from [EzBioCloud](www.ezbiocloud.net/)
+### Python script designed to streamline bioinformatics analysis and facilitate data extraction from [EzBioCloud](https://www.ezbiocloud.net/)
 
 EzBioCloud is a bioscience's public data and analytics portal focusing on taxonomy, ecology, genomics, metagenomics, and microbiome of Bacteria and Archaea. 
 
@@ -52,7 +52,7 @@ The threshold is set on 1% and only genus types and species with percentage more
 
 + Species file example:
 
-![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/0207296e-35f0-4a60-b3f3-ce91f9b348b3)
+![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/c513fa26-e695-4cad-92b9-9d4273c0dc13)
 
 ...
 
@@ -76,11 +76,14 @@ In this situation, contig data is used (contig is a set of identical and sometim
 
 ![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/5cfd5136-0556-4036-830d-a8c5f20cd9f7)
 
-3. Compare similarity percentage of all 5 _hit species name_:
+3. Compare similarity percentage of all 5 _Hit Species Name_:
 
 ![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/9e1e0b08-a861-440a-a08b-50668c0f29fe)
 
-In above example first four species name will be taken, written in organized way together with taxonomic group percentage and added to `detail.xlsx` file:
+In above example first four species names will be taken, written in organized way together with taxonomic group percentage and added to `detail.xlsx` file:
 
 ![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/c680d693-ec0f-436e-a287-55da6cbe3653)
 
+Rules of extracting _Hit Species Name_:
+  - Take all _Hit Species Name_ with 100% `Similarity`
+  - If there is no such _Hit Species Name_ with 100% `Similarity`, then take _Hit Species Name_ with `Similarity` above 99%
