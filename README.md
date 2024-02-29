@@ -68,7 +68,7 @@ During alignment, EZBioCloud sometimes assign reads to a _taxonomic group_ inste
 
 
 In this situation, contig data is used (contig is a set of identical and sometimes overlapping sequences that together represent a consensus region of DNA) in order to show the most likely species. Webdriver make a set of activities:
-1. Find `taxonomic group` in EZBiocloud Taxonomic hierarchy:
+1. Find _taxonomic group_ in EZBiocloud `Taxonomic hierarchy`:
 
 ![image](https://github.com/janklaszczyk/EzBioCloud-automation/assets/129321529/1a7a8a65-0499-4e00-a1fe-6a73106c619c)
 
