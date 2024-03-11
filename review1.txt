@@ -1,0 +1,33 @@
+I. Some general sctructure of the repo(better to talk in person)
+	1. correct file extention and name. Python scripts should have .py extention
+	2. use:
+		if __name__='__main__':
+			...
+	3. Divide the code thematicly into separate files.
+		e.g.
+		- main.py - file that should be run
+		- file_handler.py
+		- some_data_manipulator.py? - not sure what you do there yet
+	4. Good to have .gitignore - to exclude 
+
+II. If you have some constants:
+		filepaths
+		urls
+		magic numbers
+		it is bests to save them in some config
+			pydantic_settings has some neet validation
+			but simple dataclass can be nice
+			
+			Or you can use config parser but it is more hussle then it is worth
+			
+		At least save them as constants at top of the file
+
+III. Use some environment manager
+	venv is the simplest
+	poetry is extending venv for git repositories
+	
+IV. you can write some unittests
+
+V. If you don't use, start using ruff, and black.
+	pip install ruff
+	pip install black
