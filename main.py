@@ -29,9 +29,9 @@ if __name__=='__main__':
 
     seq_samples = input('Write all sequenced sample names separated by te comma (eg. Sample1, Sample2).\nEnsure that all '
                         'samples have already been uploaded to EZBioCloud in your account: ')
-    login = 'j.klaszczyk@gyncentrum.pl'
+    login = input('Type your Ezbiocloud login: ')
     print('You are logging to ' + login)
-    password = 'janekkrol10' #input('Type your Ezbiocloud password: ')
+    password = input('Type your Ezbiocloud password: ')
 
     
     print('Program started. Please step away from the computer and make Yourself a cup of coffee :)')
